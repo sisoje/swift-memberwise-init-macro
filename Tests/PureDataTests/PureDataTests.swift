@@ -3,7 +3,7 @@ import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 @testable import PublicMirrorMacros
 
-final class PublicMirrorTests: XCTestCase {
+final class PureDataTests: XCTestCase {
     let macros: [String: Macro.Type] = ["PublicMirror": PublicMirrorMacro.self]
 
     func testBasicMirror() {
@@ -166,7 +166,7 @@ final class PublicMirrorTests: XCTestCase {
                 DiagnosticSpec(
                     message: "Stored property 'count' needs an explicit type annotation so @PublicMirror can generate the public initializer.",
                     line: 3,
-                    column: 5
+                    column: 9
                 )
             ],
             macros: macros

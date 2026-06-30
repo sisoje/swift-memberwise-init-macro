@@ -1,5 +1,5 @@
 import Foundation
-import PublicMirror
+import PureData
 
 // A shared-models package: plain data the app and other packages couple to.
 // You author the underscored, internal source-of-truth structs; @PublicMirror

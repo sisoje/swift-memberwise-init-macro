@@ -1,14 +1,14 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 6.4
 import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "PublicMirror",
+    name: "PureData",
     platforms: [
-        .macOS(.v10_15), .iOS(.v13), .tvOS(.v13), .watchOS(.v6), .macCatalyst(.v13),
+        .macOS(.v26)
     ],
     products: [
-        .library(name: "PublicMirror", targets: ["PublicMirror"]),
+        .library(name: "PureData", targets: ["PureData"]),
     ],
     dependencies: [
         // swift-syntax 6xx matches Swift 6.x toolchains (601 = 6.1, 602 = 6.2, ... 604 = 6.4).
@@ -28,10 +28,10 @@ let package = Package(
             ]
         ),
         // The public-facing library that declares the @PublicMirror attribute.
-        .target(name: "PublicMirror", dependencies: ["PublicMirrorMacros"]),
+        .target(name: "PureData", dependencies: ["PublicMirrorMacros"]),
         // Tests for the macro expansion itself.
         .testTarget(
-            name: "PublicMirrorTests",
+            name: "PureDataTests",
             dependencies: [
                 "PublicMirrorMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),

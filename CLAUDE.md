@@ -1,17 +1,23 @@
 # CLAUDE.md
 
-Operating guide for any agent working on this Swift **shared-models package**.
-Read this fully before proposing changes. Several "obvious" ideas here are
-dead ends that were already investigated and rejected — they're listed so you
-don't re-propose them.
+Operating guide for any agent working on the **`PureData`** package — a Swift
+shared-models package. Read this fully before proposing changes. Several "obvious"
+ideas here are dead ends that were already investigated and rejected — they're
+listed so you don't re-propose them.
+
+**Names at a glance:** the package/module is **`PureData`**. Its types live inside
+a namespace enum **`Models`**, so consumers write **`Models.User`** (after
+`import PureData`). The macro that generates the public types is **`@PublicMirror`**,
+implemented in the separate **`PublicMirror`** package.
 
 ---
 
 ## 1. What this project is
 
-A **pure data-oriented Swift package**: plain `public` value-type structs (DTOs)
-with no behavior, consumed by **both the app and other packages**. Its job is to
-let those modules couple only through shared *data definitions*, not behavior.
+`PureData` is a **pure data-oriented Swift package**: plain `public` value-type
+structs (DTOs) with no behavior, consumed by **both the app and other packages**.
+Its job is to let those modules couple only through shared *data definitions*, not
+behavior. All types are namespaced under an `enum Models` (see Section 3).
 
 Because multiple separate packages depend on it, the module boundary is real and
 intended. That has consequences (Section 2) that drive every other decision here.
@@ -86,9 +92,12 @@ extension Models {
 }
 ```
 
-**Namespacing is done by the author, not the macro.** Wrap a group of underscored
-originals in `extension Models { ... }`; the twins are emitted in place, inside
-`Models`. The macro fills the namespace; it does not create it.
+**Namespacing is done by the author, not the macro.** The `enum Models` is the
+package's namespace **and** the enclosing scope the peer macro emits the twin into.
+Wrap a group of underscored originals in `extension Models { ... }`; the twins are
+emitted in place, inside `Models`. Consumers then reference `Models.User` (after
+`import PureData`). The macro fills the namespace; it does not create it. For a
+second grouping level, nest further role enums (`Models.Request.UpdateName`).
 
 What the macro handles: stored `let`/`var` with explicit type annotations, inline
 default values (kept as defaulted init params for `var`), inline-initialized `let`
@@ -109,9 +118,11 @@ begin with `_`; any init-bound property must have an explicit type annotation
   with no implicit bridging. Nothing except the macro should reference the
   underscored originals — the app, other packages, **and this package's own code**
   use only the generated twins (`Models.User`).
-- **Group with `enum` namespaces** where a second grouping level is wanted
-  (e.g. `Models.Request.UpdateName`). The package module name is already a
-  namespace, so an inner enum is only for sub-grouping.
+- **Group under `enum Models`.** This enum is the package's namespace and the scope
+  the peer macro emits twins into — author originals inside `extension Models { ... }`.
+  For a second grouping level, nest role enums (e.g. `Models.Request.UpdateName`).
+  The package module (`PureData`) is itself a namespace, so `import PureData` plus
+  `Models.User` is the access pattern; don't add a *second* enum also named `Models`.
 
 ---
 
@@ -240,10 +251,10 @@ on 6.3.
 ## 9. Rejected alternatives — do NOT re-propose
 
 - **Change the default access level to public.** Impossible. No such feature exists.
-- **`@testable import MyData` from the app/packages.** Test-only mechanism; requires
+- **`@testable import PureData` from the app/packages.** Test-only mechanism; requires
   `-enable-testing` (Debug test builds only), won't survive Release, and exposes
   *all* internals indiscriminately — the opposite of a deliberate API. Wrong tool.
-  Correct use of `@testable` is only inside MyData's *own* test target.
+  Correct use of `@testable` is only inside `PureData`'s *own* test target.
 - **Sourcery (additive companion files).** Can generate the public `init`, but
   **cannot flip stored-property access** — companion files only add extensions, and
   property access lives in the type body. Same wall as the macro. (Generating a full
