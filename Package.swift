@@ -1,11 +1,12 @@
-// swift-tools-version: 6.4
+// swift-tools-version: 6.3
 import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
     name: "MemberwiseInit",
     platforms: [
-        .macOS(.v26), .iOS(.v26)
+        .macOS(.v26), .iOS(.v26), .tvOS(.v26), .watchOS(.v26),
+        .visionOS(.v26), .macCatalyst(.v26),
     ],
     products: [
         .library(name: "MemberwiseInit", targets: ["MemberwiseInit"]),
