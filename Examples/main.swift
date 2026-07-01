@@ -20,7 +20,7 @@ public struct User {
 }
 
 @MemberwiseInit
-@Observable final class Zola {
+@Observable public final class Zola {
     var ii: Int = 0
 }
 
@@ -34,6 +34,8 @@ public struct PubView<Content: View>: View {
     @Binding var x: Int
     @State private var ole = 0
     let opa: Int
+    
+    @Bindable var book: Zola
 
     @ViewBuilder let vb: () -> Content
     @ViewBuilder let vb2: Content
