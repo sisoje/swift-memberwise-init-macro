@@ -52,8 +52,6 @@ Then `import MemberwiseInit` and add `@MemberwiseInit` to a struct, class, or ac
 
 ## SwiftUI
 
-`@MemberwiseInit` is designed to drop onto a `View`:
-
 - **`private` properties are excluded** from the init. Since SwiftUI's view-owned
   wrappers — `@State`, `@Environment`, `@StateObject`, … — are always `private`, they
   fall out automatically. No configuration, no per-wrapper list.
@@ -80,17 +78,16 @@ struct Card<Content: View>: View {
 
 ## Design: for pure data
 
-The macro is deliberately opinionated — it generates the init for well-formed data and
-refuses to bend around what doesn't belong on a data type:
-
 - **No type inference.** It's syntax-only: a non-private property that becomes a
   parameter needs an explicit type. `var count: Int = 0`, not `var count = 0` (the
   latter is a compile error).
-- **No stored `let` constants.** `let version = 1` as a property is a shared value in
-  disguise — make it `static let`. The macro doesn't special-case it; you'll get a
-  `let`-reassignment compile error.
+- **No stored `let` constants.** A constant isn't per-instance data — use `static let`.
+  The macro doesn't special-case an instance `let`: `let version: Int = 1` generates
+  `self.version = version` (a `let`-reassignment error), and untyped `let version = 1`
+  hits the missing-type rule above. Either way it won't compile.
 - **`private` means private.** If a value is meant to be passed in, it isn't private.
 
 ## Requirements
 
-Swift 6.4 (Xcode 27). Builds across the whole swift-syntax 6xx line.
+Swift 6.3+ (declared `swift-tools-version: 6.3`; developed on 6.4 / Xcode 27). Builds
+across the whole swift-syntax 6xx line.

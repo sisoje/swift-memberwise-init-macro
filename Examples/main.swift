@@ -8,15 +8,20 @@ import SwiftUI
 @MemberwiseInit
 public struct User {
     static let x: Int = 0
-    static var y: Int { 0 }
-    var x: Int { 0 }
+    static var y: Int {
+        0
+    }
+
+    var x: Int {
+        0
+    }
 
     public let id: UUID
     public let name: String
-    var isActive: Bool = false  // inline default → defaulted parameter
+    var isActive: Bool = false // inline default → defaulted parameter
     public let onmain: @MainActor () -> Void
-    public let onChange: () -> Void  // function type → @escaping param
-    public let onRename: @Sendable (String) -> Void  // attributed function type → @escaping param
+    public let onChange: () -> Void // function type → @escaping param
+    public let onRename: @Sendable (String) -> Void // attributed function type → @escaping param
 }
 
 @MemberwiseInit
@@ -34,7 +39,7 @@ public struct PubView<Content: View>: View {
     @Binding var x: Int
     @State private var ole = 0
     let opa: Int
-    
+
     @Bindable var book: Zola
 
     @ViewBuilder let vb: () -> Content

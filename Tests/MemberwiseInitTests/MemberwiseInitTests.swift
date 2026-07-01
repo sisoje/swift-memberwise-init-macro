@@ -1,8 +1,7 @@
+@testable import MemberwiseInitMacros
 import SwiftSyntaxMacros
 import SwiftSyntaxMacrosTestSupport
 import XCTest
-
-@testable import MemberwiseInitMacros
 
 final class MemberwiseInitTests: XCTestCase {
     let macros: [String: Macro.Type] = ["MemberwiseInit": MemberwiseInitMacro.self]
@@ -17,16 +16,16 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public struct User {
-                    public let id: UUID
-                    public var isActive: Bool = false
+            public struct User {
+                public let id: UUID
+                public var isActive: Bool = false
 
-                    public init(id: UUID, isActive: Bool = false) {
-                        self.id = id
-                        self.isActive = isActive
-                    }
+                public init(id: UUID, isActive: Bool = false) {
+                    self.id = id
+                    self.isActive = isActive
                 }
-                """,
+            }
+            """,
             macros: macros
         )
     }
@@ -42,16 +41,16 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                struct Point {
-                    let x: Int
-                    let y: Int
+            struct Point {
+                let x: Int
+                let y: Int
 
-                    init(x: Int, y: Int) {
-                        self.x = x
-                        self.y = y
-                    }
+                init(x: Int, y: Int) {
+                    self.x = x
+                    self.y = y
                 }
-                """,
+            }
+            """,
             macros: macros
         )
     }
@@ -113,18 +112,18 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public struct Handler {
-                    public var onChange: () -> Void
-                    public var onMain: @MainActor () -> Void
-                    public var onSend: @Sendable (Int) -> Void
+            public struct Handler {
+                public var onChange: () -> Void
+                public var onMain: @MainActor () -> Void
+                public var onSend: @Sendable (Int) -> Void
 
-                    public init(onChange: @escaping () -> Void, onMain: @escaping @MainActor () -> Void, onSend: @escaping @Sendable (Int) -> Void) {
-                        self.onChange = onChange
-                        self.onMain = onMain
-                        self.onSend = onSend
-                    }
+                public init(onChange: @escaping () -> Void, onMain: @escaping @MainActor () -> Void, onSend: @escaping @Sendable (Int) -> Void) {
+                    self.onChange = onChange
+                    self.onMain = onMain
+                    self.onSend = onSend
                 }
-                """,
+            }
+            """,
             macros: macros
         )
     }
@@ -144,18 +143,18 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public struct PubView: View {
-                    @Environment(\\.colorScheme) private var colorScheme
-                    @Binding public var x: Int
-                    @State private var ole = 0
-                    public let opa: Int
+            public struct PubView: View {
+                @Environment(\\.colorScheme) private var colorScheme
+                @Binding public var x: Int
+                @State private var ole = 0
+                public let opa: Int
 
-                    public init(x: Binding<Int>, opa: Int) {
-                        self._x = x
-                        self.opa = opa
-                    }
+                public init(x: Binding<Int>, opa: Int) {
+                    self._x = x
+                    self.opa = opa
                 }
-                """,
+            }
+            """,
             macros: macros
         )
     }
@@ -174,17 +173,17 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public struct V {
-                    public var title: String
-                    private var cache: Int = 0
-                    fileprivate var scratch = ""
-                    private let seed = 42
+            public struct V {
+                public var title: String
+                private var cache: Int = 0
+                fileprivate var scratch = ""
+                private let seed = 42
 
-                    public init(title: String) {
-                        self.title = title
-                    }
+                public init(title: String) {
+                    self.title = title
                 }
-                """,
+            }
+            """,
             macros: macros
         )
     }
@@ -203,18 +202,18 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public struct Box<Content: View>: View {
-                    public let title: String
-                    @ViewBuilder let vb: () -> Content
-                    @ViewBuilder let vb2: Content
+            public struct Box<Content: View>: View {
+                public let title: String
+                @ViewBuilder let vb: () -> Content
+                @ViewBuilder let vb2: Content
 
-                    public init(title: String, @ViewBuilder vb: @escaping () -> Content, @ViewBuilder vb2: () -> Content) {
-                        self.title = title
-                        self.vb = vb
-                        self.vb2 = vb2()
-                    }
+                public init(title: String, @ViewBuilder vb: @escaping () -> Content, @ViewBuilder vb2: () -> Content) {
+                    self.title = title
+                    self.vb = vb
+                    self.vb2 = vb2()
                 }
-                """,
+            }
+            """,
             macros: macros
         )
     }
@@ -231,18 +230,18 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public struct Point {
-                    public let x: Double
-                    public let y: Double
-                    public static let origin = Point(x: 0, y: 0)
-                    public var magnitude: Double { (x * x + y * y).squareRoot() }
+            public struct Point {
+                public let x: Double
+                public let y: Double
+                public static let origin = Point(x: 0, y: 0)
+                public var magnitude: Double { (x * x + y * y).squareRoot() }
 
-                    public init(x: Double, y: Double) {
-                        self.x = x
-                        self.y = y
-                    }
+                public init(x: Double, y: Double) {
+                    self.x = x
+                    self.y = y
                 }
-                """,
+            }
+            """,
             macros: macros
         )
     }
@@ -256,16 +255,16 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public enum E {
-                    case a
-                }
-                """,
+            public enum E {
+                case a
+            }
+            """,
             diagnostics: [
                 DiagnosticSpec(
                     message: "@MemberwiseInit can only be attached to a struct, class, or actor.",
                     line: 1,
                     column: 1
-                )
+                ),
             ],
             macros: macros
         )
@@ -280,17 +279,17 @@ final class MemberwiseInitTests: XCTestCase {
             }
             """,
             expandedSource: """
-                public struct Thing {
-                    public var count = 0
-                }
-                """,
+            public struct Thing {
+                public var count = 0
+            }
+            """,
             diagnostics: [
                 DiagnosticSpec(
                     message:
-                        "Stored property 'count' needs an explicit type annotation so @MemberwiseInit can generate the initializer.",
+                    "Stored property 'count' needs an explicit type annotation so @MemberwiseInit can generate the initializer.",
                     line: 3,
                     column: 16
-                )
+                ),
             ],
             macros: macros
         )

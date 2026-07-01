@@ -16,14 +16,15 @@ public enum MemberwiseInitMacro: MemberMacro {
     public static func expansion(
         of node: AttributeSyntax,
         providingMembersOf declaration: some DeclGroupSyntax,
-        conformingTo protocols: [TypeSyntax],
+        conformingTo _: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
         guard declaration.is(StructDeclSyntax.self) || declaration.is(ClassDeclSyntax.self)
             || declaration.is(ActorDeclSyntax.self)
         else {
             context.diagnose(
-                Diagnostic(node: node, message: MemberwiseInitDiagnostic.notADataType))
+                Diagnostic(node: node, message: MemberwiseInitDiagnostic.notADataType)
+            )
             return []
         }
         guard let properties = collectStoredProperties(of: declaration, in: context) else {
@@ -31,7 +32,7 @@ public enum MemberwiseInitMacro: MemberMacro {
         }
         let access = accessLevel(of: declaration)
         return [
-            DeclSyntax(stringLiteral: renderMemberwiseInit(properties: properties, access: access))
+            DeclSyntax(stringLiteral: renderMemberwiseInit(properties: properties, access: access)),
         ]
     }
 }
@@ -54,13 +55,17 @@ struct StoredProperty {
     /// `@Binding` is the one property wrapper the init threads through (as a
     /// projected `Binding<T>` parameter). Every other wrapper is view-owned or
     /// injected (`@State`, `@Environment`, `@StateObject`, …) and self-initializes.
-    var isBinding: Bool { wrapperName == "Binding" }
+    var isBinding: Bool {
+        wrapperName == "Binding"
+    }
 
     /// `@ViewBuilder` — the parameter carries the attribute so callers get trailing
     /// builder syntax. When the property stores the built value (`let vb: Content`)
     /// the parameter is a `() -> Content` the init calls; when it stores the closure
     /// (`let vb: () -> Content`) the parameter is that `@escaping` closure.
-    var isViewBuilder: Bool { wrapperName == "ViewBuilder" }
+    var isViewBuilder: Bool {
+        wrapperName == "ViewBuilder"
+    }
 }
 
 // MARK: - Collection
@@ -113,11 +118,12 @@ func collectStoredProperties(
             // inline-initialized `let` constants, and view-owned wrappers like
             // `@State`/`@Environment` — are exempt (`@State private var ole = 0`
             // needs no annotation and takes no init parameter).
-            if !property.isPrivate && property.type == nil {
+            if !property.isPrivate, property.type == nil {
                 context.diagnose(
                     Diagnostic(
                         node: Syntax(binding),
-                        message: MemberwiseInitDiagnostic.missingType(property.name))
+                        message: MemberwiseInitDiagnostic.missingType(property.name)
+                    )
                 )
                 hadError = true
                 continue
@@ -175,10 +181,10 @@ func renderMemberwiseInit(properties: [StoredProperty], access: String) -> Strin
     // One relative indentation level: the `init` header/brace at column 0, the body
     // at 4 spaces. The member macro's output is re-indented into the struct body.
     return """
-        \(access)init(\(params.joined(separator: ", "))) {
-        \(assignments)
-        }
-        """
+    \(access)init(\(params.joined(separator: ", "))) {
+    \(assignments)
+    }
+    """
 }
 
 // MARK: - Helpers
@@ -197,7 +203,7 @@ func accessLevel(of decl: some DeclGroupSyntax) -> String {
 /// The name of the first attribute on a property (its property-wrapper type, e.g.
 /// `Binding` for `@Binding`), or nil if the property carries no attributes.
 func propertyWrapperName(_ attributes: AttributeListSyntax) -> String? {
-    for case .attribute(let attr) in attributes {
+    for case let .attribute(attr) in attributes {
         if let name = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text {
             return name
         }
@@ -218,8 +224,8 @@ func isFunctionType(_ type: TypeSyntax) -> Bool {
         return isFunctionType(iuo.wrappedType)
     }
     if let tuple = type.as(TupleTypeSyntax.self),
-        tuple.elements.count == 1,
-        let inner = tuple.elements.first?.type
+       tuple.elements.count == 1,
+       let inner = tuple.elements.first?.type
     {
         return isFunctionType(inner)
     }
@@ -232,7 +238,7 @@ func isComputed(_ accessorBlock: AccessorBlockSyntax) -> Bool {
     switch accessorBlock.accessors {
     case .getter:
         return true
-    case .accessors(let list):
+    case let .accessors(list):
         return list.contains { $0.accessorSpecifier.tokenKind == .keyword(.get) }
     }
 }
@@ -242,8 +248,13 @@ func isComputed(_ accessorBlock: AccessorBlockSyntax) -> Bool {
 struct MemberwiseInitDiagnostic: DiagnosticMessage {
     let message: String
     let id: String
-    var severity: DiagnosticSeverity { .error }
-    var diagnosticID: MessageID { MessageID(domain: "MemberwiseInit", id: id) }
+    var severity: DiagnosticSeverity {
+        .error
+    }
+
+    var diagnosticID: MessageID {
+        MessageID(domain: "MemberwiseInit", id: id)
+    }
 
     static let notADataType = MemberwiseInitDiagnostic(
         message: "@MemberwiseInit can only be attached to a struct, class, or actor.",
@@ -253,7 +264,7 @@ struct MemberwiseInitDiagnostic: DiagnosticMessage {
     static func missingType(_ name: String) -> MemberwiseInitDiagnostic {
         MemberwiseInitDiagnostic(
             message:
-                "Stored property '\(name)' needs an explicit type annotation so @MemberwiseInit can generate the initializer.",
+            "Stored property '\(name)' needs an explicit type annotation so @MemberwiseInit can generate the initializer.",
             id: "missingType"
         )
     }
