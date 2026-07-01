@@ -3,12 +3,12 @@ import PackageDescription
 import CompilerPluginSupport
 
 let package = Package(
-    name: "PureData",
+    name: "MemberwiseInit",
     platforms: [
-        .macOS(.v26)
+        .macOS(.v26), .iOS(.v26)
     ],
     products: [
-        .library(name: "PureData", targets: ["PureData"]),
+        .library(name: "MemberwiseInit", targets: ["MemberwiseInit"]),
     ],
     dependencies: [
         // swift-syntax 6xx matches Swift 6.x toolchains (601 = 6.1, 602 = 6.2, ... 604 = 6.4).
@@ -18,24 +18,28 @@ let package = Package(
     targets: [
         // The macro implementation. Compiled as a compiler plugin; never ships to consumers.
         .macro(
-            name: "PublicMirrorMacros",
+            name: "MemberwiseInitMacros",
             dependencies: [
                 .product(name: "SwiftSyntax", package: "swift-syntax"),
                 .product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-                .product(name: "SwiftSyntaxBuilder", package: "swift-syntax"),
                 .product(name: "SwiftDiagnostics", package: "swift-syntax"),
                 .product(name: "SwiftCompilerPlugin", package: "swift-syntax"),
             ]
         ),
-        // The public-facing library that declares the @PublicMirror attribute.
-        .target(name: "PureData", dependencies: ["PublicMirrorMacros"]),
+        // The public-facing library that declares the @MemberwiseInit attribute.
+        .target(name: "MemberwiseInit", dependencies: ["MemberwiseInitMacros"]),
         // Tests for the macro expansion itself.
         .testTarget(
-            name: "PureDataTests",
+            name: "MemberwiseInitTests",
             dependencies: [
-                "PublicMirrorMacros",
+                "MemberwiseInitMacros",
                 .product(name: "SwiftSyntaxMacrosTestSupport", package: "swift-syntax"),
             ]
+        ),
+        .executableTarget(
+            name: "Examples",
+            dependencies: ["MemberwiseInit"],
+            path: "Examples"
         ),
     ],
     swiftLanguageModes: [.v6]

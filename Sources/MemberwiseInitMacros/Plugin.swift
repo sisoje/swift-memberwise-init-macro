@@ -2,8 +2,8 @@ import SwiftCompilerPlugin
 import SwiftSyntaxMacros
 
 @main
-struct PublicMirrorPlugin: CompilerPlugin {
+struct MemberwiseInitPlugin: CompilerPlugin {
     let providingMacros: [Macro.Type] = [
-        PublicMirrorMacro.self,
+        MemberwiseInitMacro.self
     ]
 }
