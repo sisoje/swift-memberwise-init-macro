@@ -19,8 +19,9 @@ public enum MemberwiseInitMacro: MemberMacro {
         conformingTo _: [TypeSyntax],
         in context: some MacroExpansionContext
     ) throws -> [DeclSyntax] {
-        guard declaration.is(StructDeclSyntax.self) || declaration.is(ClassDeclSyntax.self)
-            || declaration.is(ActorDeclSyntax.self)
+        guard
+            declaration.is(StructDeclSyntax.self) || declaration.is(ClassDeclSyntax.self)
+                || declaration.is(ActorDeclSyntax.self)
         else {
             context.diagnose(
                 Diagnostic(node: node, message: MemberwiseInitDiagnostic.notADataType)
@@ -32,7 +33,7 @@ public enum MemberwiseInitMacro: MemberMacro {
         }
         let access = accessLevel(of: declaration)
         return [
-            DeclSyntax(stringLiteral: renderMemberwiseInit(properties: properties, access: access)),
+            DeclSyntax(stringLiteral: renderMemberwiseInit(properties: properties, access: access))
         ]
     }
 }
@@ -160,9 +161,12 @@ func renderMemberwiseInit(properties: [StoredProperty], access: String) -> Strin
         let escaping = (p.type.map(isFunctionType) ?? false) ? "@escaping " : ""
         var param = "\(p.name): \(escaping)\(typeStr)"
         // A `var` with an inline default gets the same default as the parameter,
-        // mirroring Swift's own memberwise initializer.
+        // and an optional `var` is implicitly nil-initialized — both mirroring
+        // Swift's own memberwise initializer.
         if !p.isLet, let def = p.defaultValue {
             param += " = \(def.trimmedDescription)"
+        } else if !p.isLet, p.type.map(isOptionalType) ?? false {
+            param += " = nil"
         }
         return param
     }
@@ -181,10 +185,10 @@ func renderMemberwiseInit(properties: [StoredProperty], access: String) -> Strin
     // One relative indentation level: the `init` header/brace at column 0, the body
     // at 4 spaces. The member macro's output is re-indented into the struct body.
     return """
-    \(access)init(\(params.joined(separator: ", "))) {
-    \(assignments)
-    }
-    """
+        \(access)init(\(params.joined(separator: ", "))) {
+        \(assignments)
+        }
+        """
 }
 
 // MARK: - Helpers
@@ -203,7 +207,7 @@ func accessLevel(of decl: some DeclGroupSyntax) -> String {
 /// The name of the first attribute on a property (its property-wrapper type, e.g.
 /// `Binding` for `@Binding`), or nil if the property carries no attributes.
 func propertyWrapperName(_ attributes: AttributeListSyntax) -> String? {
-    for case let .attribute(attr) in attributes {
+    for case .attribute(let attr) in attributes {
         if let name = attr.attributeName.as(IdentifierTypeSyntax.self)?.name.text {
             return name
         }
@@ -211,25 +215,30 @@ func propertyWrapperName(_ attributes: AttributeListSyntax) -> String? {
     return nil
 }
 
-/// True if a type is a function type (plain, attributed, parenthesized, or
-/// optional), meaning a stored-property init parameter needs `@escaping`.
+/// True if a type is a function type (plain, attributed, or parenthesized),
+/// meaning a stored-property init parameter needs `@escaping`. Optional function
+/// types (`(() -> Void)?`) are deliberately *not* matched: an optional closure
+/// parameter is already escaping, and `@escaping` on it is a compile error.
 func isFunctionType(_ type: TypeSyntax) -> Bool {
     if type.is(FunctionTypeSyntax.self) { return true }
     // Attributed function types, e.g. `@MainActor () -> Void` or `@Sendable () -> Void`.
     if let attributed = type.as(AttributedTypeSyntax.self) {
         return isFunctionType(attributed.baseType)
     }
-    if let opt = type.as(OptionalTypeSyntax.self) { return isFunctionType(opt.wrappedType) }
-    if let iuo = type.as(ImplicitlyUnwrappedOptionalTypeSyntax.self) {
-        return isFunctionType(iuo.wrappedType)
-    }
     if let tuple = type.as(TupleTypeSyntax.self),
-       tuple.elements.count == 1,
-       let inner = tuple.elements.first?.type
+        tuple.elements.count == 1,
+        let inner = tuple.elements.first?.type
     {
         return isFunctionType(inner)
     }
     return false
+}
+
+/// True if a type is optional (`T?` or `T!`) — a `var` of such a type is implicitly
+/// nil-initialized, so its init parameter defaults to `nil` just like in Swift's
+/// synthesized memberwise initializer.
+func isOptionalType(_ type: TypeSyntax) -> Bool {
+    type.is(OptionalTypeSyntax.self) || type.is(ImplicitlyUnwrappedOptionalTypeSyntax.self)
 }
 
 /// True if an accessor block represents a computed property (a getter), as opposed
@@ -238,7 +247,7 @@ func isComputed(_ accessorBlock: AccessorBlockSyntax) -> Bool {
     switch accessorBlock.accessors {
     case .getter:
         return true
-    case let .accessors(list):
+    case .accessors(let list):
         return list.contains { $0.accessorSpecifier.tokenKind == .keyword(.get) }
     }
 }
@@ -264,7 +273,7 @@ struct MemberwiseInitDiagnostic: DiagnosticMessage {
     static func missingType(_ name: String) -> MemberwiseInitDiagnostic {
         MemberwiseInitDiagnostic(
             message:
-            "Stored property '\(name)' needs an explicit type annotation so @MemberwiseInit can generate the initializer.",
+                "Stored property '\(name)' needs an explicit type annotation so @MemberwiseInit can generate the initializer.",
             id: "missingType"
         )
     }

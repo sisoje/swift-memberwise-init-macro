@@ -28,7 +28,10 @@ are stable across the 6xx line.
   `let vb2: Content` → `@ViewBuilder vb2: () -> Content`, `self.vb2 = vb2()` — the init
   *calls* the builder.
 - **Function-typed properties get `@escaping`**, attributed types included
-  (`@MainActor () -> Void`, `@Sendable (Int) -> Void`).
+  (`@MainActor () -> Void`, `@Sendable (Int) -> Void`). Optional closures
+  (`(() -> Void)?`) get no `@escaping` — already escaping; adding it is a compile error.
+- **Optional `var` → `= nil` parameter default** (`T?` and `T!`), mirroring Swift's
+  synthesizer — the property is implicitly nil-initialized, no explicit `= nil` needed.
 - **No stored `let` constants.** `let version = 1` as a property is *not* special-cased;
   it yields a `let`-reassignment compile error. Use `static let`.
 - **Skipped:** computed properties and `static`/`class` members. **Kept:** stored

@@ -44,9 +44,12 @@ Then `import MemberwiseInit` and add `@MemberwiseInit` to a struct, class, or ac
 
 - **Mirrors the access level** — `public struct` → `public init`, an internal type →
   unmodified `init`, and so on.
-- **`var` defaults carry through** — `var x: Int = 0` → parameter `x: Int = 0`.
+- **`var` defaults carry through** — `var x: Int = 0` → parameter `x: Int = 0`. An
+  optional `var` is implicitly nil-initialized, so `var name: String?` → parameter
+  `name: String? = nil`, just like Swift's own memberwise init.
 - **Function-typed properties get `@escaping`**, attributed types included
-  (`@MainActor () -> Void`, `@Sendable (Int) -> Void`).
+  (`@MainActor () -> Void`, `@Sendable (Int) -> Void`). Optional closures
+  (`(() -> Void)?`) pass through as-is — they're already escaping.
 - **Skips** computed properties and `static`/`class` members; keeps stored properties
   that have only `willSet`/`didSet` observers.
 

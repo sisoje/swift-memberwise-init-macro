@@ -18,10 +18,11 @@ public struct User {
 
     public let id: UUID
     public let name: String
-    var isActive: Bool = false // inline default → defaulted parameter
+    var isActive: Bool = false  // inline default → defaulted parameter
     public let onmain: @MainActor () -> Void
-    public let onChange: () -> Void // function type → @escaping param
-    public let onRename: @Sendable (String) -> Void // attributed function type → @escaping param
+    public let onChange: () async -> Void  // function type → @escaping param
+    public let onRename: @Sendable (String, Int) async -> Void  // attributed function type → @escaping param
+    public var onDone: (() -> Void)?  // optional var → `= nil` param, no @escaping
 }
 
 @MemberwiseInit
@@ -37,8 +38,10 @@ public struct User {
 public struct PubView<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
     @Binding var x: Int
+    @Binding var xo: Int?
     @State private var ole = 0
     let opa: Int
+    var zulu: String?
 
     @Bindable var book: Zola
 
