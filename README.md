@@ -32,7 +32,7 @@ Works the same on a `class` or `actor`:
 
 ```swift
 // Package.swift
-.package(url: "https://github.com/sisoje/swift-memberwise-init-macro", branch: "main"),
+.package(url: "https://github.com/sisoje/swift-memberwise-init-macro", from: "1.0.0"),
 
 // target dependency
 .product(name: "MemberwiseInit", package: "swift-memberwise-init-macro"),
