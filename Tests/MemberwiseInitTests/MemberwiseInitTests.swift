@@ -163,27 +163,27 @@ final class MemberwiseInitTests: XCTestCase {
     func testOnlyBindingWrappersReachTheInit() {
         // @Binding is threaded through as Binding<T>; every other wrapper (@State,
         // @Environment, …) is view-owned / injected and excluded — including the
-        // untyped `@State private var ole = 0`.
+        // untyped `@State private var isExpanded = false`.
         assertMacroExpansion(
             """
             @MemberwiseInit
-            public struct PubView: View {
+            public struct ProfileCard: View {
                 @Environment(\\.colorScheme) private var colorScheme
-                @Binding public var x: Int
-                @State private var ole = 0
-                public let opa: Int
+                @Binding public var isOn: Bool
+                @State private var isExpanded = false
+                public let title: String
             }
             """,
             expandedSource: """
-                public struct PubView: View {
+                public struct ProfileCard: View {
                     @Environment(\\.colorScheme) private var colorScheme
-                    @Binding public var x: Int
-                    @State private var ole = 0
-                    public let opa: Int
+                    @Binding public var isOn: Bool
+                    @State private var isExpanded = false
+                    public let title: String
 
-                    public init(x: Binding<Int>, opa: Int) {
-                        self._x = x
-                        self.opa = opa
+                    public init(isOn: Binding<Bool>, title: String) {
+                        self._isOn = isOn
+                        self.title = title
                     }
                 }
                 """,
@@ -223,26 +223,26 @@ final class MemberwiseInitTests: XCTestCase {
     func testViewBuilderPropertiesGetBuilderParameters() {
         // @ViewBuilder carries onto the parameter. A stored closure (() -> Content)
         // becomes an @escaping builder closure; a stored value (Content) becomes a
-        // () -> Content builder the init calls (self.vb2 = vb2()).
+        // () -> Content builder the init calls (self.footer = footer()).
         assertMacroExpansion(
             """
             @MemberwiseInit
-            public struct Box<Content: View>: View {
+            public struct ProfileCard<Content: View>: View {
                 public let title: String
-                @ViewBuilder let vb: () -> Content
-                @ViewBuilder let vb2: Content
+                @ViewBuilder let content: () -> Content
+                @ViewBuilder let footer: Content
             }
             """,
             expandedSource: """
-                public struct Box<Content: View>: View {
+                public struct ProfileCard<Content: View>: View {
                     public let title: String
-                    @ViewBuilder let vb: () -> Content
-                    @ViewBuilder let vb2: Content
+                    @ViewBuilder let content: () -> Content
+                    @ViewBuilder let footer: Content
 
-                    public init(title: String, @ViewBuilder vb: @escaping () -> Content, @ViewBuilder vb2: () -> Content) {
+                    public init(title: String, @ViewBuilder content: @escaping () -> Content, @ViewBuilder footer: () -> Content) {
                         self.title = title
-                        self.vb = vb
-                        self.vb2 = vb2()
+                        self.content = content
+                        self.footer = footer()
                     }
                 }
                 """,

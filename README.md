@@ -61,9 +61,9 @@ Then `import MemberwiseInit` and add `@MemberwiseInit` to a struct, class, or ac
 - **`@Binding`** is threaded in as a projected `Binding<T>` parameter, assigned to the
   backing storage (`self._x = x`).
 - **`@ViewBuilder`** carries onto the parameter so callers get trailing-closure syntax.
-  A stored closure (`let vb: () -> Content`) becomes `@ViewBuilder vb: @escaping () -> Content`;
-  a stored value (`let vb2: Content`) becomes `@ViewBuilder vb2: () -> Content` and the
-  init calls it (`self.vb2 = vb2()`).
+  A stored closure (`let content: () -> Content`) becomes `@ViewBuilder content: @escaping () -> Content`;
+  a stored value (`let footer: Content`) becomes `@ViewBuilder footer: () -> Content` and the
+  init calls it (`self.footer = footer()`).
 
 ```swift
 @MemberwiseInit

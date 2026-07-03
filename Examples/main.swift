@@ -26,33 +26,32 @@ public struct User {
 }
 
 @MemberwiseInit
-@Observable public final class Zola {
-    var ii: Int = 0
+@Observable public final class Settings {
+    var count: Int = 0
 }
 
 // On a View: @State/@Environment are private, so they're excluded; @Binding is
-// threaded as Binding<Int>; @ViewBuilder carries onto the parameters. Generated init:
-// `init(x: Binding<Int>, opa: Int,
-//       @ViewBuilder vb: @escaping () -> Content, @ViewBuilder vb2: () -> Content)`.
+// threaded as Binding<Bool>; @ViewBuilder carries onto the parameters. Generated init:
+// `init(isOn: Binding<Bool>, title: String, subtitle: String? = nil, model: Settings,
+//       @ViewBuilder content: @escaping () -> Content, @ViewBuilder footer: () -> Content)`.
 @MemberwiseInit
-public struct PubView<Content: View>: View {
+public struct ProfileCard<Content: View>: View {
     @Environment(\.colorScheme) private var colorScheme
-    @Binding var x: Int
-    @Binding var xo: Int?
-    @State private var ole = 0
-    let opa: Int
-    var zulu: String?
+    @State private var isExpanded = false
+    @Binding var isOn: Bool
+    let title: String
+    var subtitle: String?
 
-    @Bindable var book: Zola
+    @Bindable var model: Settings
 
-    @ViewBuilder let vb: () -> Content
-    @ViewBuilder let vb2: Content
+    @ViewBuilder let content: () -> Content
+    @ViewBuilder let footer: Content
 
     public var body: some View {
         VStack {
-            Text("\(ole)")
-            vb()
-            vb2
+            Text(isExpanded ? "Expanded" : "Collapsed")
+            content()
+            footer
         }
     }
 }
