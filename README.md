@@ -72,11 +72,11 @@ struct Card<Content: View>: View {
     @State private var expanded = false              // excluded (private)
     @Binding var isOn: Bool                           // init param: Binding<Bool>
     let title: String
-    @ViewBuilder let content: Content                 // init param: @ViewBuilder () -> Content
+    @ViewBuilder let footer: Content                  // init param: @ViewBuilder () -> Content
 
     var body: some View { /* ... */ }
 }
-// init(isOn: Binding<Bool>, title: String, @ViewBuilder content: () -> Content)
+// init(isOn: Binding<Bool>, title: String, @ViewBuilder footer: () -> Content)
 ```
 
 ## Design: for pure data
